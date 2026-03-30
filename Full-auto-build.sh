@@ -133,6 +133,8 @@ cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
 finish
 
 # 5.4. Linux-5.19.2 API Headers
+## Need to download the kernel package since the filesize was too big to include the GIT repo
+wget https://www.kernel.org/pub/linux/kernel/v5.x/linux-5.19.2.tar.xz
 begin linux-5.19.2 tar.xz
 make mrproper
 make headers
