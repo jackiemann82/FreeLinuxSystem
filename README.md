@@ -1,2 +1,2 @@
-# FreeLinuxSystem
+# Automated-LFSv11.2-Build
 This is a free distribution of Linux based on the Linux From Scratch project (https://www.linuxfromscratch.org/) version 11.2 that requires building from the ground up. Scripts have been provided to automate the process as much as possible. This will use the linux 5.19.2 kernel (https://www.kernel.org/pub/linux/kernel/v5.x/linux-5.19.2.tar.xz). Most of the instructions and scripts for steps 5, 9, 11, and 12 came from https://github.com/luisgbm/lfs-scripts.git.
