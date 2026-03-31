@@ -41,11 +41,11 @@ useradd -m -p "$(openssl passwd -1 "password")" "lfs"
 chown -R lfs:lfs $LFS/*
 chown lfs:lfs $LFS
 
-sudo -u lfs `cat > ~/.bash_profile << "EOF"
+sudo -u lfs cat > ~/.bash_profile << "EOF"
 exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
-EOF`
+EOF
 
-sudo -u lfs `cat > ~/.bashrc << "EOF"
+sudo -u lfs cat > ~/.bashrc << "EOF"
 set +h
 umask 022
 LFS=/mnt/lfs
@@ -444,17 +444,13 @@ if [ -h $LFS/dev/shm ]; then
 	mkdir -pv $LFS/$(readlink $LFS/dev/shm)
 fi
 
-# Step 7
+# Step 7 and 8
 LFS=/mnt/lfs
 echo "LFS Build - Step 7 - Entering the chroot environment"
 chroot "$LFS" /usr/bin/env -i HOME=/root TERM="$TERM" PS1='(lfs chroot) \u:\w\$' PATH=/usr/bin:/usr/sbin /bin/bash --login
-echo "Left chroot environment"
-
-# Step 8
-LFS=/mnt/lfs
 echo "LFS Build - Step 8 - Creating essential directories, files, and symlinks"
 echo "WARNING!!! Use in chroot environment ONLY!!! ctrl+c to exit if not in chroot environment"
-sleep 5
+sleep 30
 mkdir -pv /{boot,home,mnt,opt,srv}
 mkdir -pv /etc/{opt,sysconfig}
 mkdir -pv /lib/firmware
