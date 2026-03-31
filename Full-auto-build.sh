@@ -450,6 +450,11 @@ echo "LFS Build - Step 7 - Entering the chroot environment"
 chroot "$LFS" /usr/bin/env -i HOME=/root TERM="$TERM" PS1='(lfs chroot) \u:\w\$' PATH=/usr/bin:/usr/sbin /bin/bash --login
 echo "LFS Build - Step 8 - Creating essential directories, files, and symlinks"
 echo "WARNING!!! Use in chroot environment ONLY!!! ctrl+c to exit if not in chroot environment"
+if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+  echo "We are chrooted!"
+else
+  echo "NOT CHROOTED!"
+fi
 sleep 30
 mkdir -pv /{boot,home,mnt,opt,srv}
 mkdir -pv /etc/{opt,sysconfig}
