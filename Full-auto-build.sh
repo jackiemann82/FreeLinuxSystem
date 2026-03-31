@@ -6,20 +6,15 @@ if [ "$EUID" -ne 0 ]
 fi
 echo "Setting up a new LFS system requires formatting a new drive. Below is the list of hard drives found:"
 fdisk --list | grep 'Disk /dev/sd*'
-n
-
-
-
-
-w
 echo "Select the device to be formatted for the new LFS system: "
 read device
 echo "Creating new filesystem for "$device
+(printf "n\n"; printf "\n"; printf "\n"; printf "\n"; printf "\n"; printf "w\n") | fdisk $device
 mkfs.ext4 $device"1"
 mkdir /mnt/lfs
 mount $device"1" /mnt/lfs
 export LFS=/mnt/lfs
-source .bashrc
+source ~/.bashrc
 
 #Step 3
 echo "System build - Step 3 - Create Basic Filesystem"
@@ -35,7 +30,8 @@ case $(uname -m) in
 esac
 
 mkdir -pv $LFS/tools
-cp -rf sources/ $LFS/sources
+cp -rvf sources/ $LFS/sources
+
 # Step 4
 echo "LFS Build - Step 4 - Create lfs user"
 LFS="/mnt/lfs"
@@ -45,6 +41,24 @@ useradd -m -p "$(openssl passwd -1 "password")" "lfs"
 chown -R lfs:lfs $LFS/*
 chown lfs:lfs $LFS
 
+sudo -u lfs `cat > ~/.bash_profile << "EOF"
+exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+EOF`
+
+sudo -u lfs `cat > ~/.bashrc << "EOF"
+set +h
+umask 022
+LFS=/mnt/lfs
+LC_ALL=POSIX
+LFS_TGT=$(uname -m)-lfs-linux-gnu
+PATH=/usr/bin
+if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
+PATH=$LFS/tools/bin:$PATH
+CONFIG_SITE=$LFS/usr/share/config.site
+export LFS LC_ALL LFS_TGT PATH CONFIG_SITE
+EOF
+
+source ~/.bashrc`
 
 # Step 5
 # LFS 11.2 Build Script
@@ -62,21 +76,21 @@ begin() {
 	package_ext=$2
 
 	echo "[lfs-cross] Starting build of $package_name at $(date)"
-
-	tar xf $package_name.$package_ext
+	sudo -u lfs tar xf $package_name.$package_ext
 	cd $package_name
 }
 
 finish() {
 	echo "[lfs-cross] Finishing build of $package_name at $(date)"
-
 	cd $LFS/sources
-	rm -rf $package_name
+	sudo -l lfs rm -rf $package_name
 }
 
 cd $LFS/sources
-
+pwd
+sleep 5
 # 5.2. Binutils-2.39 - Pass 1
+su - lfs << EOF
 begin binutils-2.39 tar.xz
 mkdir -v build
 cd       build
@@ -412,7 +426,8 @@ make
 make DESTDIR=$LFS install
 ln -sv gcc $LFS/usr/bin/cc
 finish
-echo "Type 'exit' to return to the root user to run the remaining scripts"
+EOF
+#echo "Type 'exit' to return to the root user to run the remaining scripts"
 
 # Step 6
 LFS=/mnt/lfs
