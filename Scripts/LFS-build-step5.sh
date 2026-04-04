@@ -27,7 +27,6 @@ begin binutils-2.39 tar.xz
 mkdir -v build
 cd build/
 ../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror
-exit 0
 make
 make install
 finish
@@ -73,6 +72,7 @@ cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
   dirname $LFS_TGT/install-tools/include/limits.h
 finish
 
+wget https://www.kernel.org/pub/linux/kernel/v5.x/linux-5.19.2.tar.xz
 begin linux-5.19.2 tar.xz
 make mrproper
 make headers
@@ -124,7 +124,6 @@ make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/lib{stdc++,stdc++fs,supc++}.la
 finish
 
-# 6.2. M4-1.4.19
 begin m4-1.4.19 tar.xz
 ./configure --prefix=/usr   \
             --host=$LFS_TGT \
@@ -195,7 +194,7 @@ pushd build
                --disable-libseccomp \
                --disable-xzlib      \
                --disable-zlib
-  make
+make
 popd
 ./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
 make FILE_COMPILE=$(pwd)/build/src/file
