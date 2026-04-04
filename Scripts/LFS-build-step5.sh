@@ -6,6 +6,7 @@
 echo "LFS Build - Step 5 - Cross-toolchain and Cross compiling"
 LFS="/mnt/lfs"
 LFS_Sources="/mnt/lfs/sources"
+LFS_TGT=$(uname -m)-lfs-linux-gnu
 cd $LFS_Sources
 pwd
 begin () {
