@@ -3,44 +3,35 @@
 # Builds the cross-toolchain and cross compiling temporary tools from chapters 5 and 6
 # by Luís Mendes :)
 # 06/Sep/2022
-
-package_name=""
-package_ext=""
-
-begin() {
+echo "LFS Build - Step 5 - Cross-toolchain and Cross compiling"
+LFS="/mnt/lfs"
+LFS_Sources="/mnt/lfs/sources"
+cd $LFS_Sources
+pwd
+begin () {
 	package_name=$1
 	package_ext=$2
-
 	echo "[lfs-cross] Starting build of $package_name at $(date)"
-
-	tar xf $package_name.$package_ext
+	tar -xvf $package_name.$package_ext
 	cd $package_name
+	pwd
 }
 
-finish() {
+finish () {
 	echo "[lfs-cross] Finishing build of $package_name at $(date)"
-
-	cd $LFS/sources
-	rm -rf $package_name
+	cd $LFS_Sources
+	rm -rvf $package_name
 }
 
-cd $LFS/sources
-
-# 5.2. Binutils-2.39 - Pass 1
 begin binutils-2.39 tar.xz
 mkdir -v build
-cd       build
-../configure --prefix=$LFS/tools \
-             --with-sysroot=$LFS \
-             --target=$LFS_TGT   \
-             --disable-nls       \
-             --enable-gprofng=no \
-             --disable-werror
+cd build/
+../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT --disable-nls --enable-gprofng=no --disable-werror
+exit 0
 make
 make install
 finish
 
-# 5.3. GCC-12.2.0 - Pass 1
 begin gcc-12.2.0 tar.xz
 tar -xf ../mpfr-4.1.0.tar.xz
 mv -v mpfr-4.1.0 mpfr
@@ -79,10 +70,9 @@ make
 make install
 cd ..
 cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
-  `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
+  dirname $LFS_TGT/install-tools/include/limits.h
 finish
 
-# 5.4. Linux-5.19.2 API Headers
 begin linux-5.19.2 tar.xz
 make mrproper
 make headers
@@ -90,7 +80,6 @@ find usr/include -type f ! -name '*.h' -delete
 cp -rv usr/include $LFS/usr
 finish
 
-# 5.5. Glibc-2.36
 begin glibc-2.36 tar.xz
 case $(uname -m) in
     i?86)   ln -sfv ld-linux.so.2 $LFS/lib/ld-lsb.so.3
@@ -119,7 +108,6 @@ rm -v a.out
 $LFS/tools/libexec/gcc/$LFS_TGT/12.2.0/install-tools/mkheaders
 finish
 
-# 5.6. Libstdc++ from GCC-12.2.0
 begin gcc-12.2.0 tar.xz
 mkdir -v build
 cd       build
@@ -145,7 +133,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.3. Ncurses-6.3
 begin ncurses-6.3 tar.gz
 sed -i s/mawk// configure
 mkdir build
@@ -171,7 +158,6 @@ make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
 echo "INPUT(-lncursesw)" > $LFS/usr/lib/libncurses.so
 finish
 
-# 6.4. Bash-5.1.16
 begin bash-5.1.16 tar.gz
 ./configure --prefix=/usr                   \
             --build=$(support/config.guess) \
@@ -182,7 +168,6 @@ make DESTDIR=$LFS install
 ln -sv bash $LFS/bin/sh
 finish
 
-# 6.5. Coreutils-9.1
 begin coreutils-9.1 tar.xz
 ./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
@@ -197,14 +182,12 @@ mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
 sed -i 's/"1"/"8"/'                    $LFS/usr/share/man/man8/chroot.8
 finish
 
-# 6.6. Diffutils-3.8
 begin diffutils-3.8 tar.xz
 ./configure --prefix=/usr --host=$LFS_TGT
 make
 make DESTDIR=$LFS install
 finish
 
-# 6.7. File-5.42
 begin file-5.42 tar.gz
 mkdir build
 pushd build
@@ -220,7 +203,6 @@ make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/libmagic.la
 finish
 
-# 6.8. Findutils-4.9.0
 begin findutils-4.9.0 tar.xz
 ./configure --prefix=/usr                   \
             --localstatedir=/var/lib/locate \
@@ -230,7 +212,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.9. Gawk-5.1.1
 begin gawk-5.1.1 tar.xz
 sed -i 's/extras//' Makefile.in
 ./configure --prefix=/usr   \
@@ -240,7 +221,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.10. Grep-3.7
 begin grep-3.7 tar.xz
 ./configure --prefix=/usr   \
             --host=$LFS_TGT
@@ -248,14 +228,12 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.11. Gzip-1.12
 begin gzip-1.12 tar.xz
 ./configure --prefix=/usr --host=$LFS_TGT
 make
 make DESTDIR=$LFS install
 finish
 
-# 6.12. Make-4.3
 begin make-4.3 tar.gz
 ./configure --prefix=/usr   \
             --without-guile \
@@ -265,7 +243,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.13. Patch-2.7.6
 begin patch-2.7.6 tar.xz
 ./configure --prefix=/usr   \
             --host=$LFS_TGT \
@@ -274,7 +251,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.14. Sed-4.8
 begin sed-4.8 tar.xz
 ./configure --prefix=/usr   \
             --host=$LFS_TGT
@@ -282,7 +258,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.15. Tar-1.34
 begin tar-1.34 tar.xz
 ./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
@@ -291,7 +266,6 @@ make
 make DESTDIR=$LFS install
 finish
 
-# 6.16. Xz-5.2.6
 begin xz-5.2.6 tar.xz
 ./configure --prefix=/usr                     \
             --host=$LFS_TGT                   \
@@ -303,7 +277,6 @@ make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/liblzma.la
 finish
 
-# 6.17. Binutils-2.39 - Pass 2
 begin binutils-2.39 tar.xz
 sed '6009s/$add_dir//' -i ltmain.sh
 mkdir -v build
@@ -322,13 +295,12 @@ make DESTDIR=$LFS install
 rm -v $LFS/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes}.{a,la}
 finish
 
-# 6.18. GCC-12.2.0 - Pass 2
 begin gcc-12.2.0 tar.xz
-tar -xf ../mpfr-4.1.0.tar.xz
+tar -xvf $LFS_Sources/mpfr-4.1.0.tar.xz
 mv -v mpfr-4.1.0 mpfr
-tar -xf ../gmp-6.2.1.tar.xz
+tar -xvf $LFS_Sources/gmp-6.2.1.tar.xz
 mv -v gmp-6.2.1 gmp
-tar -xf ../mpc-1.2.1.tar.gz
+tar -xvf $LFS_Sources/mpc-1.2.1.tar.gz
 mv -v mpc-1.2.1 mpc
 case $(uname -m) in
   x86_64)
@@ -360,4 +332,3 @@ make
 make DESTDIR=$LFS install
 ln -sv gcc $LFS/usr/bin/cc
 finish
-echo "Type 'exit' to return to the root user to run the remaining scripts"
